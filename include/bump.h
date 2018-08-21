@@ -1,15 +1,15 @@
 #pragma once
 
+#include "perlin_noise.h"
 #include "material.h"
 
-#include <functional>
-
-class Lambertian: public Material {
+class Bump: public Material {
 public:
-    Lambertian(std::function<double()> dice, glm::vec3 albedo);
+    Bump() = delete;
+    Bump(glm::vec3 albedo);
     boost::optional<std::pair<glm::vec3, Ray>> Scatter(const Ray &ray, const HitRecord &record) const;
 
 private:
-    std::function<double()> dice_;
+    static const PerlinNoise generator_;
     glm::vec3 albedo_;
 };
