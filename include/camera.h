@@ -10,6 +10,7 @@ private:
 
 public:
     Camera() = delete;
+    Camera(glm::vec3 position, glm::vec3 look_at, glm::vec3 up, double field_of_view, double width_height_aspect);
     Camera(glm::vec3 position, glm::vec3 lower_left_corner, glm::vec3 horizontal, glm::vec3 vertical);
     glm::vec3 position() const;
     glm::vec3 lower_left_corner() const;

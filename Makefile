@@ -1,4 +1,5 @@
 CPP_FLAG = -std=c++17
+OPT_FLAG = -O2
 CC = clang++
 SRC_DIR = src
 INCLUDE_DIR = include
@@ -12,7 +13,7 @@ TARGET_FILES = $(BIN_DIR)/main
 all: $(TARGET_FILES)
 
 $(TARGET_FILES): $(OBJ_FILES)
-	$(CC) $(CPP_FLAG) $(OBJ_FILES) -o $@
+	$(CC) $(OPT_FLAG) $(CPP_FLAG) $(OBJ_FILES) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	-$(CC) $(CPP_FLAG) $(INCLUDE_FLAG) -c $< -o $@
