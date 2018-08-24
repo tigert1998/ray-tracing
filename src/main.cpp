@@ -62,7 +62,7 @@ void Init(int argc, char **argv) {
     std::uniform_real_distribution<double> dis(-1, 1);
     dice = std::bind(dis, engine);
 
-    camera_ptr = make_shared<Camera>(vec3(-0.9, 0.9, -1.6), vec3(0, 0, 0), vec3(0, 1, 0), pi<double>() * 0.7, double(width) / height);
+    camera_ptr = make_shared<Camera>(vec3(-0.9, 0.9, -1.6), vec3(0, 0, 0), vec3(0, 1, 0), pi<double>() * 0.7, double(width) / height, 0.3, 1.5);
     object_list.list().push_back(make_shared<Sphere>(vec3(1, 0, 0), 1, make_shared<Metal>(vec3(0.8, 0.8, 0.8))));
     object_list.list().push_back(make_shared<Sphere>(vec3(-1, 0, 0), 1, make_shared<Bump>(vec3(1, 0.5, 0.5))));
     object_list.list().push_back(make_shared<Sphere>(vec3(0, -1e3 - 1, 0), 1e3, make_shared<Lambertian>(dice, vec3(0.8, 0.8, 0))));
