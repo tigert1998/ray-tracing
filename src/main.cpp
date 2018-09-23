@@ -32,7 +32,7 @@ using std::pair;
 using boost::format;
 using boost::none;
 
-int width = 1024, height = 512, samples = 100;
+int width = 1200, height = 800, samples = 100;
 
 shared_ptr<Camera> camera_ptr;
 HitableList object_list;
@@ -64,7 +64,7 @@ void SetupStage() {
         res.z = dice() * 5;
         return res;
     };
-    static constexpr int total = 2;
+    static constexpr int total = 20;
     vector<vec3> positions;
     for (int i = 0; i < total; i++) {
         while (true) {
@@ -86,7 +86,7 @@ fail_test:;
         shared_ptr<Material> material;
         if (t == 0) {
             double index = dice() * 0.3 + 1.4;
-            material = make_shared<Dielectric>(c, index);
+            material = make_shared<Dielectric>(sqrt(c), index);
         } else if (t == 1) {
             material = make_shared<Lambertian>(dice, c);
         } else {
@@ -109,7 +109,8 @@ void Init(int argc, char **argv) {
         cerr << "Invalid argument." << endl;
         exit(1);
     }
-    std::default_random_engine engine(time(nullptr));
+    auto seed = time(nullptr);
+    std::default_random_engine engine(seed);
     std::uniform_real_distribution<double> dis(-1, 1);
     dice = std::bind(dis, engine);
 

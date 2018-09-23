@@ -21,6 +21,7 @@ Dielectric::Dielectric(vec3 attenuation, double refractive_index) {
 
 optional<pair<vec3, Ray>> Dielectric::Scatter(const Ray &ray, const HitRecord &record) const {
     static auto VectorIsValid = [] (vec3 v) -> bool {
+        if (v[0] == 0 && v[1] == 0 && v[2] == 0) return false;
         for (int i = 0; i < 3; i++) if (isnan(v[i])) return false;
         return true;
     };
