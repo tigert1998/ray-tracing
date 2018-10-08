@@ -1,7 +1,6 @@
 #include "hitable_list.h"
 
-using boost::optional;
-using boost::none;
+using boost::optional, boost::none;
 using std::pair;
 
 std::vector<std::shared_ptr<Hitable>> &HitableList::list() {

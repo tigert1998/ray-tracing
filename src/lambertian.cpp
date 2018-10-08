@@ -2,10 +2,8 @@
 
 #include "lambertian.h"
 
-using boost::optional;
-using boost::none;
-using std::pair;
-using std::function;
+using boost::optional, boost::none;
+using std::pair, std::function;
 using namespace glm;
 
 Lambertian::Lambertian(function<double()> dice, vec3 albedo) {

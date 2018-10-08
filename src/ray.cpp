@@ -1,7 +1,6 @@
 #include "ray.h"
 
-using glm::vec3;
-using glm::normalize;
+using glm::vec3, glm::normalize;
 
 Ray::Ray(vec3 position, vec3 direction): position_(position) {
     direction_ = normalize(direction);

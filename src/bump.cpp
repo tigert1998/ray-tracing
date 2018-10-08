@@ -2,12 +2,9 @@
 
 #include "bump.h"
 
-using boost::optional;
-using boost::none;
+using boost::optional, boost::none;
 using std::pair;
-using glm::vec3;
-using glm::reflect;
-using glm::ballRand;
+using glm::vec3, glm::reflect, glm::ballRand;
 
 const PerlinNoise Bump::generator_ = PerlinNoise(256);
 

@@ -7,10 +7,7 @@
 
 #include "perlin_noise.h"
 
-using std::tuple;
-using std::vector;
-using std::cout;
-using std::endl;
+using std::tuple, std::vector, std::cout, std::endl;
 using boost::format;
 using glm::highp_dvec3;
 

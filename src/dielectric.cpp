@@ -6,12 +6,8 @@
 
 #include "dielectric.h"
 
-using boost::optional;
-using boost::none;
-using boost::format;
-using std::pair;
-using std::cerr;
-using std::endl;
+using boost::optional, boost::none, boost::format;
+using std::pair, std::cerr, std::endl;
 using namespace glm;
 
 Dielectric::Dielectric(vec3 attenuation, double refractive_index) {

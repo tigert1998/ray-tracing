@@ -20,17 +20,8 @@
 
 using namespace glm;
 using std::make_shared;
-using std::string;
-using std::weak_ptr;
-using std::shared_ptr;
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::function;
-using std::vector;
-using std::pair;
-using boost::format;
-using boost::none;
+using std::string, std::weak_ptr, std::shared_ptr, std::cout, std::cerr, std::endl, std::function, std::vector, std::pair;
+using boost::format, boost::none;
 
 int width = 1200, height = 800, samples = 100;
 

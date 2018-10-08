@@ -1,8 +1,7 @@
 #include "sphere.h"
 
 using namespace glm;
-using boost::optional;
-using boost::none;
+using boost::optional, boost::none;
 
 Sphere::Sphere(vec3 position, double radius, std::shared_ptr<Material> material_ptr): radius_(radius), position_(position), material_ptr_(material_ptr) { }
 

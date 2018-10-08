@@ -2,8 +2,7 @@
 
 #include "metal.h"
 
-using boost::optional;
-using boost::none;
+using boost::optional, boost::none;
 using std::pair;
 using namespace glm;
 
