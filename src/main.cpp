@@ -17,10 +17,12 @@
 #include "bump.h"
 #include "metal.h"
 #include "dielectric.h"
+#include "checker_texture.h"
+#include "constant_texture.h"
 
 using namespace glm;
-using std::make_shared;
-using std::string, std::weak_ptr, std::shared_ptr, std::cout, std::cerr, std::endl, std::function, std::vector, std::pair;
+using std::make_shared, std::string, std::weak_ptr, std::shared_ptr, std::cout;
+using std::cerr, std::endl, std::function, std::vector, std::pair;
 using boost::format, boost::none;
 
 int width = 1200, height = 800, samples = 100;
@@ -69,7 +71,11 @@ fail_test:;
         }
     }
 
-    auto stage = make_shared<Sphere>(vec3(0, -1e3, 0), 1e3, make_shared<Lambertian>(dice, GREY));
+    auto checker_texture = make_shared<CheckerTexture>(
+        make_shared<ConstantTexture>(vec3(0.2, 0.3, 0.1)),
+        make_shared<ConstantTexture>(vec3(0.9, 0.9, 0.9))
+    );
+    auto stage = make_shared<Sphere>(vec3(0, -1e3, 0), 1e3, make_shared<Lambertian>(dice, checker_texture));
     object_list.list().push_back(stage);
     for (int i = 0; i < total; i++) {
         int t = floor((dice() + 1) * 3 / 2);
@@ -79,7 +85,7 @@ fail_test:;
             double index = dice() * 0.3 + 1.4;
             material = make_shared<Dielectric>(sqrt(c), index);
         } else if (t == 1) {
-            material = make_shared<Lambertian>(dice, c);
+            material = make_shared<Lambertian>(dice, make_shared<ConstantTexture>(c));
         } else {
             material = make_shared<Metal>(c);
         }
