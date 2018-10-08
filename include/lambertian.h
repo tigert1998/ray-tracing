@@ -4,6 +4,7 @@
 #include "texture.h"
 
 #include <functional>
+#include <memory>
 
 class Lambertian: public Material {
 public:

@@ -10,7 +10,13 @@ SRC_FILES = $(wildcard $(SRC_DIR)/*)
 OBJ_FILES = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRC_FILES)))
 TARGET_FILES = $(BIN_DIR)/main
 
-all: $(TARGET_FILES)
+DIRS = $(OBJ_DIR) $(BIN_DIR)
+
+
+all: $(DIRS) $(TARGET_FILES)
+
+$(DIRS):
+	mkdir $@
 
 $(TARGET_FILES): $(OBJ_FILES)
 	$(CC) $(OPT_FLAG) $(CPP_FLAG) $(OBJ_FILES) -o $@

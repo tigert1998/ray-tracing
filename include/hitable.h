@@ -4,6 +4,8 @@ struct HitRecord;
 
 #include <boost/optional.hpp>
 
+#include <memory>
+
 #include "ray.h"
 #include "material.h"
 
