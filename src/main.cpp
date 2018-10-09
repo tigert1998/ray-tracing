@@ -4,6 +4,7 @@
 #include <functional>
 #include <fstream>
 #include <memory>
+#include <thread>
 
 #include <boost/format.hpp>
 
@@ -23,9 +24,10 @@
 using namespace glm;
 using std::make_shared, std::string, std::weak_ptr, std::shared_ptr, std::cout;
 using std::cerr, std::endl, std::function, std::vector, std::pair;
+using std::thread;
 using boost::format, boost::none;
 
-int width = 1200, height = 800, samples = 100;
+int width = 1200, height = 800, samples = 100, number_of_threads = 1;
 
 shared_ptr<Camera> camera_ptr;
 HitableList object_list;
@@ -95,13 +97,17 @@ fail_test:;
 }
 
 void Init(int argc, char **argv) {
-    if (argc < 2) {
+    if (argc <= 1) {
         cerr << "Not sufficient arguments." << endl;
         exit(1);
     }
     try {
         samples = std::stoi(argv[1]);
         if (samples <= 0) throw std::invalid_argument("");
+        if (argc >= 3) {
+            number_of_threads = std::stoi(argv[2]);
+            if (number_of_threads <= 0) throw std::invalid_argument("");
+        }
     } catch (...) {
         cerr << "Invalid argument." << endl;
         exit(1);
@@ -147,24 +153,47 @@ void Output(vector<vec3> &pixels) {
     }
 }
 
-void Render(vector<vec3> &pixels) {
-    for (int i = 0; i < height; i++) {
-        cout << format("\rRendering %.2lf%%") % (100. * i / height) << std::flush;
-        for (int j = 0; j < width; j++) {
-            auto color = vec3(0);
-            for (int k = 0; k < samples; k++) {
-                double x = (dice() + double(j)) / double(width);
-                double y = (dice() + double(height - i)) / double(height);
-                x = 2 * x - 1;
-                y = 2 * y - 1;
-                auto ray = camera_ptr->ray_at(x, y);
-                auto temp = Trace(ray, 0);
-                color += temp;
-            }
-            color /= float(samples);
-            pixels[i * width + j] = color;
-        }
+vec3 RenderPixel(int i, int j) {
+    // 0 <= i < height
+    // 0 <= j < width
+    auto color = vec3(0);
+    for (int k = 0; k < samples; k++) {
+        double x = (dice() + double(j)) / double(width);
+        double y = (dice() + double(height - i)) / double(height);
+        x = 2 * x - 1;
+        y = 2 * y - 1;
+        auto ray = camera_ptr->ray_at(x, y);
+        auto temp = Trace(ray, 0);
+        color += temp;
     }
+    color /= float(samples);
+    return color;
+}
+
+void Render(vector<vec3> &pixels) {
+    int current = 0;
+    auto update_info = [&] () {
+        current++;
+        if (current % width == 0) {
+            double p = 100. * current / width / height;
+            cout << format("\rRendering %.2lf%%") % p << std::flush;
+        }
+    };
+    auto render_segment = [&] (int l, int r) {
+        for (int i = l; i <= r; i++) {
+            auto color = RenderPixel(i / width, i % width);
+            pixels[i] = color;
+            update_info();
+        }
+    };
+    vector<thread> threads;
+    int single_thread_work_load = ((width * height + number_of_threads - 1) / number_of_threads);
+    for (int i = 0; i < number_of_threads; i++) {
+        int l = single_thread_work_load * i;
+        int r = std::min(single_thread_work_load * (i + 1), width * height);
+        threads.emplace_back(render_segment, l, r - 1);
+    }
+    for (thread &t: threads) t.join();
 }
 
 int main(int argc, char **argv) {
