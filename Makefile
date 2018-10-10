@@ -28,4 +28,3 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 clean:
 	-rm -r $(OBJ_DIR)/*
 	-rm -r $(BIN_DIR)/*
-

@@ -19,11 +19,13 @@
 #include "metal.h"
 #include "dielectric.h"
 #include "texture"
+#include "parallelogram.h"
+#include "diffuse_light.h"
 
-using namespace glm;
+using glm::vec3, glm::pi;
 using std::make_shared, std::string, std::weak_ptr, std::shared_ptr, std::cout;
 using std::cerr, std::endl, std::function, std::vector, std::pair;
-using std::thread;
+using std::thread, std::array;
 using boost::format, boost::none;
 
 int width = 1200, height = 800, samples = 100, number_of_threads = 1;
@@ -47,8 +49,15 @@ void SetupStage() {
         make_shared<ConstantTexture>(vec3(0.9, 0.9, 0.9))
     );
     auto noise_texture_ptr = make_shared<NoiseTexture>(1);
-    auto stage = make_shared<Sphere>(vec3(0, -1e3, 0), 1e3, make_shared<Lambertian>(dice, noise_texture_ptr));
+    auto stage = make_shared<Sphere>(vec3(0, -1e3, 0), 1e3, make_shared<Lambertian>(dice, checker_texture_ptr));
     object_list.list().push_back(stage);
+
+    auto light = make_shared<Parallelogram>(
+        array<vec3, 3>({vec3(-2, 0, 0), vec3(2, 0, 0), vec3(-2, 4, 0)}),
+        make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(1, 1, 1)))
+    );
+
+    object_list.list().push_back(light);
 }
 
 void Init(int argc, char **argv) {
@@ -81,18 +90,18 @@ void Init(int argc, char **argv) {
 vec3 Trace(const Ray &ray, int depth) {
     auto record = object_list.Hit(ray, pair<double, double>(1e-3, DBL_MAX));
     if (record == none) {
-        float ratio = ray.direction().y * 0.5 + 0.5;
-        auto result = color::SAPPHIRE * ratio + color::WHITE * (1 - ratio);
-        return result;
+        return color::BLACK;
     }
     auto material_ptr = record->material_ptr.lock();
     auto attenuation_reflection_pair = material_ptr->Scatter(ray, record.value());
+    auto hit_point = ray.position() + (float) record->t * ray.direction();
+    auto emitted = material_ptr->Emit(0, 0, hit_point);
     if (attenuation_reflection_pair == none) {
-        return color::BLACK;
+        return emitted;
     }
     auto attenuation = attenuation_reflection_pair->first;
     auto reflection = attenuation_reflection_pair->second;
-    auto result = attenuation * Trace(reflection, depth + 1);
+    auto result = emitted + attenuation * Trace(reflection, depth + 1);
     return result;
 }
 
