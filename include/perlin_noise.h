@@ -15,6 +15,7 @@ public:
     double Noise(glm::vec3 position) const;
     glm::highp_dvec3 DerivativeNoise(double x, double y, double z) const;
     glm::highp_dvec3 DerivativeNoise(glm::highp_dvec3 position) const;
+    double Turbulent(glm::vec3 position, uint32_t depth) const;
 
 private:
     using WeightsType = std::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>>;

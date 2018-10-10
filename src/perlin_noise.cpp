@@ -117,3 +117,19 @@ highp_dvec3 PerlinNoise::DerivativeNoise(double x, double y, double z) const {
 highp_dvec3 PerlinNoise::DerivativeNoise(highp_dvec3 position) const {
     return DerivativeNoise(position.x, position.y, position.z);
 }
+
+double PerlinNoise::Turbulent(glm::vec3 position, uint32_t depth) const {
+    if (depth == 0) throw std::invalid_argument("");
+    double weight = 1;
+    double scale = 1;
+    double total_weight = 0;
+    double res = 0;
+    for (int i = 0; i < depth; i++) {
+        res += Noise(position * float(scale)) * weight;
+        total_weight += weight;
+        weight *= 0.5;
+        scale *= 2;
+    }
+    res /= total_weight;
+    return res;
+}

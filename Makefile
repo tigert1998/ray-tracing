@@ -22,7 +22,7 @@ $(TARGET_FILES): $(OBJ_FILES)
 	$(CC) $(OPT_FLAG) $(CPP_FLAG) $(OBJ_FILES) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	if [ ! -d $(dir $@) ]; then mkdir $(dir $@); fi
+	@if [ ! -d $(dir $@) ]; then mkdir $(dir $@); fi
 	-$(CC) $(CPP_FLAG) $(INCLUDE_FLAG) -c $< -o $@
 
 clean:
