@@ -18,8 +18,7 @@
 #include "bump.h"
 #include "metal.h"
 #include "dielectric.h"
-#include "checker_texture.h"
-#include "constant_texture.h"
+#include "texture"
 
 using namespace glm;
 using std::make_shared, std::string, std::weak_ptr, std::shared_ptr, std::cout;
@@ -43,57 +42,13 @@ namespace color {
 }
 
 void SetupStage() {
-    // 0 -> dielectric
-    // 1 -> lambertian
-    // 2 -> metal
-    using namespace color;
-    static auto generate_color = [] () -> vec3 {
-        vec3 res;
-        for (int i = 0; i < 3; i++) res[i] = (dice() + 1) * 0.5;
-        return res;
-    };
-    static auto generate_position = [] () -> vec3 {
-        vec3 res;
-        res.x = dice() * 20;
-        res.y = dice() * 0.5 + 1.5;
-        res.z = dice() * 5;
-        return res;
-    };
-    static constexpr int total = 20;
-    vector<vec3> positions;
-    for (int i = 0; i < total; i++) {
-        while (true) {
-            auto p = generate_position();
-            for (const vec3 &prev_p: positions) {
-                if (distance(prev_p, p) <= p.y + prev_p.y) goto fail_test;
-            }
-            positions.push_back(p);
-            break;
-fail_test:;
-        }
-    }
-
-    auto checker_texture = make_shared<CheckerTexture>(
+    auto checker_texture_ptr = make_shared<CheckerTexture>(
         make_shared<ConstantTexture>(vec3(0.2, 0.3, 0.1)),
         make_shared<ConstantTexture>(vec3(0.9, 0.9, 0.9))
     );
-    auto stage = make_shared<Sphere>(vec3(0, -1e3, 0), 1e3, make_shared<Lambertian>(dice, checker_texture));
+    auto noise_texture_ptr = make_shared<NoiseTexture>(1);
+    auto stage = make_shared<Sphere>(vec3(0, -1e3, 0), 1e3, make_shared<Lambertian>(dice, noise_texture_ptr));
     object_list.list().push_back(stage);
-    for (int i = 0; i < total; i++) {
-        int t = floor((dice() + 1) * 3 / 2);
-        auto p = positions[i], c = generate_color();
-        shared_ptr<Material> material;
-        if (t == 0) {
-            double index = dice() * 0.3 + 1.4;
-            material = make_shared<Dielectric>(sqrt(c), index);
-        } else if (t == 1) {
-            material = make_shared<Lambertian>(dice, make_shared<ConstantTexture>(c));
-        } else {
-            material = make_shared<Metal>(c);
-        }
-        auto object = make_shared<Sphere>(p, p.y, material);
-        object_list.list().push_back(object);
-    }
 }
 
 void Init(int argc, char **argv) {

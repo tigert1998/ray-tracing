@@ -9,7 +9,7 @@
 
 using std::tuple, std::vector, std::cout, std::endl;
 using boost::format;
-using glm::highp_dvec3;
+using glm::highp_dvec3, glm::vec3;
 
 double PerlinNoise::F(double x) {
     return 6 * pow(x, 5) - 15 * pow(x, 4) + 10 * pow(x, 3);
@@ -73,6 +73,10 @@ double PerlinNoise::Grad(int x, int y, int z, double dx, double dy, double dz) c
 
 double PerlinNoise::Noise(highp_dvec3 position) const {
     return Noise(position.x, position.y, position.z);
+}
+
+double PerlinNoise::Noise(vec3 position) const {
+    return Noise(highp_dvec3(position));
 }
 
 highp_dvec3 PerlinNoise::DerivativeNoise(double x, double y, double z) const {
