@@ -6,7 +6,8 @@
 
 class Parallelogram: public Hitable {
 private:
-	HitableList list_;
+	std::array<glm::vec3, 4> p_;
+	std::shared_ptr<Material> material_ptr_;
 
 public:
 	Parallelogram() = delete;

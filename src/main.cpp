@@ -29,7 +29,9 @@ using std::cerr, std::endl, std::function, std::vector, std::pair;
 using std::thread, std::array;
 using boost::format, boost::none;
 
-int width = 1200, height = 800, samples = 100, number_of_threads = 1;
+constexpr int TRACE_DEPTH_LIMIT = 50;
+
+int width = 800, height = 800, samples = 100, number_of_threads = 1;
 
 shared_ptr<Camera> camera_ptr;
 HitableList object_list;
@@ -53,41 +55,53 @@ void SetupStage() {
     auto red_material_ptr = make_shared<Lambertian>(dice, vec3(0.65, 0.05, 0.05));
     auto white_material_ptr = make_shared<Lambertian>(dice, vec3(0.73, 0.73, 0.73));
     auto green_material_ptr = make_shared<Lambertian>(dice, vec3(0.12, 0.45, 0.15));
-    auto light_material_ptr = make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(15.f, 15.f, 15.f)));
+    auto light_material_ptr = make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(30.f, 30.f, 30.f)));
 
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>({vec3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555)}), 
+            array<vec3, 3>{vec3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555)},
             red_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>({vec3(555, 0, 0), vec3(555, 555, 0), vec3(555, 0, 555)}), 
+            array<vec3, 3>{vec3(555, 0, 0), vec3(555, 555, 0), vec3(555, 0, 555)}, 
             green_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>({vec3(213, 554, 332), vec3(213, 554, 227), vec3(343, 554, 332)}), 
+            array<vec3, 3>{vec3(213, 554, 332), vec3(213, 554, 227), vec3(343, 554, 332)}, 
             light_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>({vec3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555)}), 
+            array<vec3, 3>{vec3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555)}, 
             white_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>({vec3(0, 0, 555), vec3(0, 555, 555), vec3(555, 0, 555)}), 
+            array<vec3, 3>{vec3(0, 0, 555), vec3(0, 555, 555), vec3(555, 0, 555)}, 
             white_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>({vec3(0, 555, 0), vec3(555, 555, 0), vec3(0, 555, 555)}), 
+            array<vec3, 3>{vec3(0, 555, 0), vec3(555, 555, 0), vec3(0, 555, 555)}, 
+            white_material_ptr
+        )
+    );
+    object_list.list().push_back(
+        make_shared<Parallelepiped>(
+            array<vec3, 4>{vec3(130, 0, 65), vec3(130, 165, 65), vec3(295, 0, 65), vec3(130, 0, 230)}, 
+            white_material_ptr
+        )
+    );
+    object_list.list().push_back(
+        make_shared<Parallelepiped>(
+            array<vec3, 4>{vec3(265, 0, 295), vec3(265, 330, 295), vec3(430, 0, 295), vec3(265, 0, 460)}, 
             white_material_ptr
         )
     );
@@ -121,7 +135,7 @@ void Init(int argc, char **argv) {
 
 vec3 Trace(const Ray &ray, int depth) {
     auto record = object_list.Hit(ray, pair<double, double>(1e-3, DBL_MAX));
-    if (record == none) {
+    if (record == none || depth > TRACE_DEPTH_LIMIT) {
         return color::BLACK;
     }
     auto material_ptr = record->material_ptr.lock();
