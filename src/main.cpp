@@ -19,10 +19,11 @@
 #include "metal.h"
 #include "dielectric.h"
 #include "texture"
+#include "parallelepiped.h"
 #include "parallelogram.h"
 #include "diffuse_light.h"
 
-using glm::vec3, glm::pi;
+using glm::vec3, glm::pi, glm::clamp;
 using std::make_shared, std::string, std::weak_ptr, std::shared_ptr, std::cout;
 using std::cerr, std::endl, std::function, std::vector, std::pair;
 using std::thread, std::array;
@@ -38,26 +39,58 @@ vector<vec3> pixels;
 namespace color {
     vec3 WHITE = vec3(1, 1, 1);
     vec3 BLACK = vec3(0, 0, 0);
-    vec3 SAPPHIRE = vec3(0.5, 0.7, 1);
-    vec3 LIGHT_GREEN = vec3(0.4, 1, 0.4);
-    vec3 GREY = vec3(0.69, 0.69, 0.69);
 }
 
 void SetupStage() {
-    auto checker_texture_ptr = make_shared<CheckerTexture>(
-        make_shared<ConstantTexture>(vec3(0.2, 0.3, 0.1)),
-        make_shared<ConstantTexture>(vec3(0.9, 0.9, 0.9))
-    );
-    auto noise_texture_ptr = make_shared<NoiseTexture>(1);
-    auto stage = make_shared<Sphere>(vec3(0, -1e3, 0), 1e3, make_shared<Lambertian>(dice, checker_texture_ptr));
-    object_list.list().push_back(stage);
-
-    auto light = make_shared<Parallelogram>(
-        array<vec3, 3>({vec3(-2, 0, 0), vec3(2, 0, 0), vec3(-2, 4, 0)}),
-        make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(1, 1, 1)))
+    camera_ptr = make_shared<Camera>(
+        vec3(278, 278, -800), 
+        vec3(278, 278, 0), 
+        vec3(0, 1, 0), 
+        pi<double>() * 2 / 9, 
+        double(width) / height
     );
 
-    object_list.list().push_back(light);
+    auto red_material_ptr = make_shared<Lambertian>(dice, vec3(0.65, 0.05, 0.05));
+    auto white_material_ptr = make_shared<Lambertian>(dice, vec3(0.73, 0.73, 0.73));
+    auto green_material_ptr = make_shared<Lambertian>(dice, vec3(0.12, 0.45, 0.15));
+    auto light_material_ptr = make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(15.f, 15.f, 15.f)));
+
+    object_list.list().push_back(
+        make_shared<Parallelogram>(
+            array<vec3, 3>({vec3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555)}), 
+            red_material_ptr
+        )
+    );
+    object_list.list().push_back(
+        make_shared<Parallelogram>(
+            array<vec3, 3>({vec3(555, 0, 0), vec3(555, 555, 0), vec3(555, 0, 555)}), 
+            green_material_ptr
+        )
+    );
+    object_list.list().push_back(
+        make_shared<Parallelogram>(
+            array<vec3, 3>({vec3(213, 554, 332), vec3(213, 554, 227), vec3(343, 554, 332)}), 
+            light_material_ptr
+        )
+    );
+    object_list.list().push_back(
+        make_shared<Parallelogram>(
+            array<vec3, 3>({vec3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555)}), 
+            white_material_ptr
+        )
+    );
+    object_list.list().push_back(
+        make_shared<Parallelogram>(
+            array<vec3, 3>({vec3(0, 0, 555), vec3(0, 555, 555), vec3(555, 0, 555)}), 
+            white_material_ptr
+        )
+    );
+    object_list.list().push_back(
+        make_shared<Parallelogram>(
+            array<vec3, 3>({vec3(0, 555, 0), vec3(555, 555, 0), vec3(0, 555, 555)}), 
+            white_material_ptr
+        )
+    );
 }
 
 void Init(int argc, char **argv) {
@@ -81,7 +114,6 @@ void Init(int argc, char **argv) {
     std::uniform_real_distribution<double> dis(-1, 1);
     dice = std::bind(dis, engine);
 
-    camera_ptr = make_shared<Camera>(vec3(0, 5, 8), vec3(0, 2, 0), vec3(0, 1, 0), pi<double>() * 0.7, double(width) / height);
     SetupStage();
 
     pixels.resize(width * height);
@@ -131,6 +163,7 @@ vec3 RenderPixel(int i, int j) {
         color += temp;
     }
     color /= float(samples);
+    color = clamp(color, 0.f, 1.f);
     return color;
 }
 

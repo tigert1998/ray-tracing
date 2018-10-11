@@ -21,7 +21,15 @@ optional<pair<vec3, Ray>> Lambertian::Scatter(const Ray &ray, const HitRecord &r
     if (dot(ray.direction(), record.normal) >= 0)
         return none;
     auto p = ray.position() + float(record.t) * ray.direction();
-    auto target = p + record.normal + ballRand(0.9f);
+    vec3 target;
+    {
+        vec3 next_dir = sphericalRand(1.f);
+        auto dot_value = dot(next_dir, record.normal);
+        if (dot_value < 0) {
+            next_dir += record.normal * std::abs(2 * dot_value);
+        }
+        target = p + next_dir;
+    }
     auto albedo = texture_ptr_->Value(0, 0, p);
     return pair<vec3, Ray>(albedo, Ray(p, target - p));
 }
