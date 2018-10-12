@@ -8,8 +8,10 @@
 
 #include <boost/format.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #include "camera.h"
 #include "hitable_list.h"
@@ -23,7 +25,7 @@
 #include "parallelogram.h"
 #include "diffuse_light.h"
 
-using glm::vec3, glm::pi, glm::clamp;
+using glm::vec3, glm::pi, glm::clamp, glm::rotateY;
 using std::make_shared, std::string, std::weak_ptr, std::shared_ptr, std::cout;
 using std::cerr, std::endl, std::function, std::vector, std::pair;
 using std::thread, std::array;
@@ -31,7 +33,7 @@ using boost::format, boost::none;
 
 constexpr int TRACE_DEPTH_LIMIT = 50;
 
-int width = 800, height = 800, samples = 100, number_of_threads = 1;
+int width = 400, height = 400, samples = 100, number_of_threads = 1;
 
 shared_ptr<Camera> camera_ptr;
 HitableList object_list;
@@ -55,7 +57,7 @@ void SetupStage() {
     auto red_material_ptr = make_shared<Lambertian>(dice, vec3(0.65, 0.05, 0.05));
     auto white_material_ptr = make_shared<Lambertian>(dice, vec3(0.73, 0.73, 0.73));
     auto green_material_ptr = make_shared<Lambertian>(dice, vec3(0.12, 0.45, 0.15));
-    auto light_material_ptr = make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(30.f, 30.f, 30.f)));
+    auto light_material_ptr = make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(100.f, 100.f, 100.f)));
 
     object_list.list().push_back(
         make_shared<Parallelogram>(
@@ -95,14 +97,16 @@ void SetupStage() {
     );
     object_list.list().push_back(
         make_shared<Parallelepiped>(
-            array<vec3, 4>{vec3(130, 0, 65), vec3(130, 165, 65), vec3(295, 0, 65), vec3(130, 0, 230)}, 
-            white_material_ptr
+            vec3(165, 165, 165), 
+            white_material_ptr,
+            [] (vec3 p) -> vec3 { return rotateY(p, -pi<float>() * 0.1f) + vec3(130, 0, 165); }
         )
     );
     object_list.list().push_back(
         make_shared<Parallelepiped>(
-            array<vec3, 4>{vec3(265, 0, 295), vec3(265, 330, 295), vec3(430, 0, 295), vec3(265, 0, 460)}, 
-            white_material_ptr
+            vec3(165, 330, 165), 
+            white_material_ptr,
+            [] (vec3 p) -> vec3 { return rotateY(p, pi<float>() / 12.f) + vec3(265, 0, 295); }
         )
     );
 }
