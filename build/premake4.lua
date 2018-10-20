@@ -8,7 +8,9 @@ configuration "Release"
 project "ray-tracing"
     kind "ConsoleApp"
     language "C++"
-    linkoptions {}
+    linkoptions {
+      "-lpthread"
+    }
     buildoptions { "-std=c++17" }
 
     includedirs {
