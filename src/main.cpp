@@ -5,6 +5,7 @@
 #include <fstream>
 #include <memory>
 #include <thread>
+#include <mutex>
 
 #include <boost/format.hpp>
 
@@ -47,10 +48,10 @@ namespace color {
 
 void SetupStage() {
     camera_ptr = make_shared<Camera>(
-        vec3(278, 278, -800), 
-        vec3(278, 278, 0), 
-        vec3(0, 1, 0), 
-        pi<double>() * 2 / 9, 
+        vec3(278, 278, -800),
+        vec3(278, 278, 0),
+        vec3(0, 1, 0),
+        pi<double>() * 2 / 9,
         double(width) / height
     );
 
@@ -67,44 +68,44 @@ void SetupStage() {
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>{vec3(555, 0, 0), vec3(555, 555, 0), vec3(555, 0, 555)}, 
+            array<vec3, 3>{vec3(555, 0, 0), vec3(555, 555, 0), vec3(555, 0, 555)},
             green_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>{vec3(213, 554, 332), vec3(213, 554, 227), vec3(343, 554, 332)}, 
+            array<vec3, 3>{vec3(213, 554, 332), vec3(213, 554, 227), vec3(343, 554, 332)},
             light_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>{vec3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555)}, 
+            array<vec3, 3>{vec3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555)},
             white_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>{vec3(0, 0, 555), vec3(0, 555, 555), vec3(555, 0, 555)}, 
+            array<vec3, 3>{vec3(0, 0, 555), vec3(0, 555, 555), vec3(555, 0, 555)},
             white_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelogram>(
-            array<vec3, 3>{vec3(0, 555, 0), vec3(555, 555, 0), vec3(0, 555, 555)}, 
+            array<vec3, 3>{vec3(0, 555, 0), vec3(555, 555, 0), vec3(0, 555, 555)},
             white_material_ptr
         )
     );
     object_list.list().push_back(
         make_shared<Parallelepiped>(
-            vec3(165, 165, 165), 
+            vec3(165, 165, 165),
             white_material_ptr,
             [] (vec3 p) -> vec3 { return rotateY(p, -pi<float>() * 0.1f) + vec3(130, 0, 165); }
         )
     );
     object_list.list().push_back(
         make_shared<Parallelepiped>(
-            vec3(165, 330, 165), 
+            vec3(165, 330, 165),
             white_material_ptr,
             [] (vec3 p) -> vec3 { return rotateY(p, pi<float>() / 12.f) + vec3(265, 0, 295); }
         )
@@ -188,6 +189,9 @@ vec3 RenderPixel(int i, int j) {
 void Render(vector<vec3> &pixels) {
     int current = 0;
     auto update_info = [&] () {
+        using std::mutex, std::lock_guard;
+        static mutex current_mutex;
+        lock_guard<mutex> guard(current_mutex);
         current++;
         if (current % width == 0) {
             double p = 100. * current / width / height;
