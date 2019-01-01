@@ -34,7 +34,7 @@ using boost::format, boost::none;
 
 constexpr int TRACE_DEPTH_LIMIT = 10;
 
-int width = 400, height = 400, samples = 100, number_of_threads = thread::hardware_concurrency();
+int width = 400, height = 400, spp = 100, number_of_threads = thread::hardware_concurrency();
 
 shared_ptr<Camera> camera_ptr;
 HitableList object_list;
@@ -118,8 +118,9 @@ void Init(int argc, char **argv) {
         exit(1);
     }
     try {
-        samples = std::stoi(argv[1]);
-        if (samples <= 0) throw std::invalid_argument("");
+        spp = std::stoi(argv[1]);
+        if (spp <= 0) throw std::invalid_argument("");
+        cout << "spp = " << spp << "\n";
         if (argc >= 3) {
             number_of_threads = std::stoi(argv[2]);
             if (number_of_threads <= 0) throw std::invalid_argument("");
@@ -158,7 +159,7 @@ vec3 Trace(const Ray &ray, int depth) {
 
 void Output(vector<vec3> &pixels) {
     string title = "image.ppm";
-    cout << "\nWriting to " << title << "..." << endl;
+    cout << "Writing to " << title << "..." << endl;
     std::fstream fs(title, std::ios::out);
     fs << format("P3\n%1% %2%\n255\n") % width % height;
     for (int i = 0; i < width * height; i++) {
@@ -172,7 +173,7 @@ vec3 RenderPixel(int i, int j) {
     // 0 <= i < height
     // 0 <= j < width
     auto color = vec3(0);
-    for (int k = 0; k < samples; k++) {
+    for (int k = 0; k < spp; k++) {
         double x = (dice() + double(j)) / double(width);
         double y = (dice() + double(height - i)) / double(height);
         x = 2 * x - 1;
@@ -181,17 +182,15 @@ vec3 RenderPixel(int i, int j) {
         auto temp = Trace(ray, 0);
         color += temp;
     }
-    color /= float(samples);
+    color /= float(spp);
     color = clamp(color, 0.f, 1.f);
     return color;
 }
 
 void Render(vector<vec3> &pixels) {
-    int current = 0;
+    auto start_clk = std::chrono::system_clock::now();
+    std::atomic_int current = 0;
     auto update_info = [&] () {
-        using std::mutex, std::lock_guard;
-        static mutex current_mutex;
-        lock_guard<mutex> guard(current_mutex);
         current++;
         if (current % width == 0) {
             double p = 100. * current / width / height;
@@ -213,6 +212,8 @@ void Render(vector<vec3> &pixels) {
         threads.emplace_back(render_segment, l, r - 1);
     }
     for (thread &t: threads) t.join();
+    auto end_clk = std::chrono::system_clock::now();
+    cout << "\nRay tracing consumes: " << std::chrono::duration<double>(end_clk - start_clk).count() << "s\n";
 }
 
 int main(int argc, char **argv) {
