@@ -4,6 +4,7 @@ configuration "Debug"
     targetdir "../bin/Debug"
 configuration "Release"
     targetdir "../bin/Release"
+    buildoptions { "-O2" }
 
 project "ray-tracing"
     kind "ConsoleApp"

@@ -3,5 +3,6 @@ bin
 obj
 *.ppm
 *.png
+.vscode
 build/*
 !build/premake4.lua

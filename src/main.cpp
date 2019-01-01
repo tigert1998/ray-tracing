@@ -32,9 +32,9 @@ using std::cerr, std::endl, std::function, std::vector, std::pair;
 using std::thread, std::array;
 using boost::format, boost::none;
 
-constexpr int TRACE_DEPTH_LIMIT = 50;
+constexpr int TRACE_DEPTH_LIMIT = 10;
 
-int width = 400, height = 400, samples = 100, number_of_threads = 1;
+int width = 400, height = 400, samples = 100, number_of_threads = thread::hardware_concurrency();
 
 shared_ptr<Camera> camera_ptr;
 HitableList object_list;
