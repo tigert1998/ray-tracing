@@ -139,21 +139,36 @@ void Init(int argc, char **argv) {
     pixels.resize(width * height);
 }
 
-vec3 Trace(const Ray &ray, int depth) {
-    auto record = object_list.Hit(ray, pair<double, double>(1e-3, DBL_MAX));
-    if (record == none || depth > TRACE_DEPTH_LIMIT) {
-        return color::BLACK;
+vec3 Trace(Ray ray) {
+    std::vector<std::tuple<vec3, vec3>> storage;
+    storage.reserve(TRACE_DEPTH_LIMIT);
+
+    vec3 result;
+    for (int depth = 0;; depth++) {
+        auto record = object_list.Hit(ray, pair<double, double>(1e-3, DBL_MAX));
+        if (record == none || depth > TRACE_DEPTH_LIMIT) {
+            result = color::BLACK;
+            break;
+        }
+        auto material_ptr = record->material_ptr.lock();
+        auto attenuation_reflection_pair = material_ptr->Scatter(ray, record.value());
+        auto hit_point = ray.position() + (float) record->t * ray.direction();
+        auto emitted = material_ptr->Emit(0, 0, hit_point);
+        if (attenuation_reflection_pair == none) {
+            result = emitted;
+            break;
+        }
+        auto attenuation = attenuation_reflection_pair->first;
+        auto reflection = attenuation_reflection_pair->second;
+        storage.emplace_back(emitted, attenuation);
+        ray = reflection;
     }
-    auto material_ptr = record->material_ptr.lock();
-    auto attenuation_reflection_pair = material_ptr->Scatter(ray, record.value());
-    auto hit_point = ray.position() + (float) record->t * ray.direction();
-    auto emitted = material_ptr->Emit(0, 0, hit_point);
-    if (attenuation_reflection_pair == none) {
-        return emitted;
+
+    for (int i = storage.size() - 1; i >= 0; i--) {
+        vec3 emitted, attenuation;
+        std::tie(emitted, attenuation) = storage[i];
+        result = emitted + attenuation * result;
     }
-    auto attenuation = attenuation_reflection_pair->first;
-    auto reflection = attenuation_reflection_pair->second;
-    auto result = emitted + attenuation * Trace(reflection, depth + 1);
     return result;
 }
 
@@ -179,7 +194,7 @@ vec3 RenderPixel(int i, int j) {
         x = 2 * x - 1;
         y = 2 * y - 1;
         auto ray = camera_ptr->ray_at(x, y);
-        auto temp = Trace(ray, 0);
+        auto temp = Trace(ray);
         color += temp;
     }
     color /= float(spp);
