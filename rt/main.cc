@@ -1,6 +1,7 @@
 #include <atomic>
 #include <fstream>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -115,13 +116,13 @@ void Init(int argc, char **argv) {
 }
 
 vec3 Trace(Ray ray) {
-  std::vector<std::tuple<vec3, vec3>> storage;
-  storage.reserve(TRACE_DEPTH_LIMIT);
+  std::tuple<vec3, vec3> storage[TRACE_DEPTH_LIMIT];
+  int storage_size = 0;
 
   vec3 result;
   for (int depth = 0;; depth++) {
     auto record = object_list.Hit(ray, pair<double, double>(1e-3, DBL_MAX));
-    if (record == std::nullopt || depth > TRACE_DEPTH_LIMIT) {
+    if (record == std::nullopt || depth >= TRACE_DEPTH_LIMIT) {
       result = color::BLACK;
       break;
     }
@@ -136,11 +137,11 @@ vec3 Trace(Ray ray) {
     }
     auto attenuation = attenuation_reflection_pair->first;
     auto reflection = attenuation_reflection_pair->second;
-    storage.emplace_back(emitted, attenuation);
+    storage[storage_size++] = {emitted, attenuation};
     ray = reflection;
   }
 
-  for (int i = storage.size() - 1; i >= 0; i--) {
+  for (int i = storage_size - 1; i >= 0; i--) {
     vec3 emitted, attenuation;
     std::tie(emitted, attenuation) = storage[i];
     result = emitted + attenuation * result;
@@ -179,14 +180,20 @@ vec3 RenderPixel(int i, int j) {
 
 void Render(vector<vec3> &pixels) {
   auto start_clk = std::chrono::system_clock::now();
-  std::atomic_int current = 0;
+  std::atomic_int current = 0, last_ratio = 0;
+
   auto update_info = [&]() {
     current++;
-    if (current % width == 0) {
-      double p = 100. * current / width / height;
-      cout << "\rRendering " << p << "%" << std::flush;
+    int ratio = 100. * current / width / height;
+    if (ratio > last_ratio) {
+      last_ratio.store(ratio, std::memory_order_acquire);
+      std::mutex mtx;
+      mtx.lock();
+      cout << "\rRendering " << std::setw(2) << ratio << "%" << std::flush;
+      mtx.unlock();
     }
   };
+
   auto render_segment = [&](int l, int r) {
     for (int i = l; i <= r; i++) {
       auto color = RenderPixel(i / width, i % width);
