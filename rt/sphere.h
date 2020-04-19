@@ -10,11 +10,11 @@ class Sphere : public Hitable {
   Sphere() = delete;
   Sphere(glm::vec3 position, double radius,
          std::shared_ptr<Material> material_ptr);
-  std::optional<HitRecord> Hit(const Ray &ray,
+  std::optional<HitRecord> Hit(const Ray& ray,
                                std::pair<double, double> t_range) const;
   double radius() const;
   glm::vec3 position() const;
-  std::weak_ptr<Material> material_ptr() const;
+  Material* material_ptr() const;
 
  private:
   double radius_;

@@ -11,7 +11,7 @@ struct HitRecord;
 struct HitRecord {
   double t;
   glm::vec3 normal;
-  std::weak_ptr<Material> material_ptr;
+  Material *material_ptr;
 };
 
 class Hitable {

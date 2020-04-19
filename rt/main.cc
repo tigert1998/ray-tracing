@@ -27,7 +27,7 @@
 
 using glm::vec3, glm::pi, glm::clamp, glm::rotateY;
 using std::cerr, std::endl, std::function, std::vector, std::pair;
-using std::make_shared, std::string, std::weak_ptr, std::shared_ptr, std::cout;
+using std::make_shared, std::string, std::shared_ptr, std::cout;
 using std::thread, std::array;
 
 constexpr int TRACE_DEPTH_LIMIT = 10;
@@ -125,7 +125,7 @@ vec3 Trace(Ray ray) {
       result = color::BLACK;
       break;
     }
-    auto material_ptr = record->material_ptr.lock();
+    auto material_ptr = record->material_ptr;
     auto attenuation_reflection_pair =
         material_ptr->Scatter(ray, record.value());
     auto hit_point = ray.position() + (float)record->t * ray.direction();

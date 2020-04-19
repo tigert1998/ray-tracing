@@ -35,6 +35,6 @@ optional<HitRecord> Parallelogram::Hit(const Ray &ray,
   HitRecord record;
   record.t = t;
   record.normal = dot(n, ray.direction()) < 0 ? n : -n;
-  record.material_ptr = material_ptr_;
+  record.material_ptr = material_ptr_.get();
   return record;
 }
