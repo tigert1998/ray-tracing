@@ -1,8 +1,8 @@
 .DS_Store
-bin
-obj
 *.ppm
 *.png
 .vscode
-build/*
-!build/premake4.lua
+bazel-out
+bazel-ray-tracing
+bazel-testlogs
+bazel-bin
