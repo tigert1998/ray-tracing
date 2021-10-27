@@ -10,14 +10,13 @@
 #include <thread>
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-
 #include "bump.h"
 #include "camera.h"
 #include "dielectric.h"
 #include "diffuse_light.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/constants.hpp"
+#include "glm/gtx/rotate_vector.hpp"
 #include "hitable_list.h"
 #include "lambertian.h"
 #include "metal.h"

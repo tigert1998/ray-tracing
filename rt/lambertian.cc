@@ -1,7 +1,6 @@
 #include "lambertian.h"
 
-#include <glm/gtc/random.hpp>
-
+#include "glm/gtc/random.hpp"
 #include "textures/constant_texture.h"
 
 using std::optional;

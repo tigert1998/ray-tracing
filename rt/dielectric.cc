@@ -1,7 +1,8 @@
 #include "dielectric.h"
 
-#include <glm/geometric.hpp>
 #include <iostream>
+
+#include "glm/geometric.hpp"
 
 using std::optional;
 using std::pair, std::cerr, std::endl;

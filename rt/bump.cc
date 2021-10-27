@@ -1,6 +1,6 @@
 #include "bump.h"
 
-#include <glm/gtc/random.hpp>
+#include "glm/gtc/random.hpp"
 
 using glm::vec3, glm::reflect, glm::ballRand;
 using std::pair;

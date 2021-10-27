@@ -1,8 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <optional>
 
+#include "glm/glm.hpp"
 #include "ray.h"
 
 class Camera {

@@ -157,4 +157,5 @@ cc_binary(
         ":parallelepiped",
         ":sphere"
     ],
+    linkopts = ["-lpthread"],
 )

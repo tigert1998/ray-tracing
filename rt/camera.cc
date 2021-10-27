@@ -1,6 +1,6 @@
 #include "camera.h"
 
-#include <glm/gtc/random.hpp>
+#include "glm/gtc/random.hpp"
 
 using namespace glm;
 

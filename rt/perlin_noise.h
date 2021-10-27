@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <tuple>
 #include <vector>
+
+#include "glm/glm.hpp"
 
 class PerlinNoise {
  public:

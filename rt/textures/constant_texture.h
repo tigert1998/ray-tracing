@@ -1,7 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
+#include "glm/glm.hpp"
 #include "texture.h"
 
 class ConstantTexture : public Texture {
